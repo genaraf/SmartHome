@@ -1,5 +1,5 @@
 /* Hardware DevDuino Sensor Node V2.0 (ATmega 328) 
- *  http://www.seeedstudio.com/wiki/DevDuino_Sensor_Node_V2.0_(ATmega_328)
+ *  http://wiki.seeedstudio.com/wiki/DevDuino_Sensor_Node_V2.0_(ATmega_328)
  *  Grove - Temp&Humi Sensor(SHT31)
  *  http://www.seeedstudio.com/wiki/Grove_-_Tempture%26Humidity_Sensor_(High-Accuracy_%26Mini)_v1.0
  */
@@ -7,8 +7,8 @@
 #define MY_RF24_CE_PIN 8
 #define MY_RF24_CS_PIN 7
 
-#define DEBUG
-#define MY_DEBUG
+//#define DEBUG
+//#define MY_DEBUG
 //#define MY_DEBUG_VERBOSE_SIGNING
 
 #include <SPI.h>
@@ -19,8 +19,11 @@
 #define TEMP_CHILD_NODE_ID 1
 #define HUM_CHILD_NODE_ID 2
 
+#ifdef DEBUG
+unsigned long UPDATE_INTERVAL = 20000;  // Sleep time between reads (in milliseconds)
+#else
 unsigned long UPDATE_INTERVAL = 1200000;  // Sleep time between reads (in milliseconds)
-
+#endif
 #define BUTTON_PIN 4
 #define LED_PIN 9
 
@@ -69,6 +72,7 @@ long readVcc() {
 
 void setup() {
 /* Reset HP20x_dev */
+  delay(150);
   TH02.begin();
   delay(100);
   
@@ -80,27 +84,16 @@ void loop() {
   float t = TH02.ReadTemperature(); 
   float h = TH02.ReadHumidity();
 
-  if (! isnan(t)) {  // check if 'is not a number'
 #ifdef DEBUG
-    Serial.print("Temp *C = "); Serial.println(t);
+  Serial.print("Temp *C = "); Serial.println(t);
 #endif 
-    send(msgTemp.set(t, 2));
-  } else { 
-#ifdef DEBUG
-    Serial.println("Failed to read temperature");
-#endif 
-  }
+  send(msgTemp.set(t, 2));
   
-  if (! isnan(h)) {  // check if 'is not a number'
 #ifdef DEBUG
-    Serial.print("Hum. % = "); Serial.println(h);
-    send(msgHum.set(h, 2));
+  Serial.print("Hum. % = "); Serial.println(h);
 #endif 
-  } else { 
-#ifdef DEBUG
-    Serial.println("Failed to read humidity");
-#endif 
-  }
+  send(msgHum.set(h, 2));
+
    long volt = readVcc(); 
 #ifdef DEBUG
     Serial.print("Voltage: "); Serial.println(volt);
