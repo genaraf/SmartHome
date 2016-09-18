@@ -13,7 +13,10 @@
 #include <MySensors.h> 
 
 #define TEMP_CHILD_NODE_ID 1
-#define HUM_CHILD_NODE_ID 2
+#define PH_CHILD_NODE_ID 2
+#define MOIST_CHILD_NODE_ID 3
+#define LIGHT_CHILD_NODE_ID 4
+#define UV_CHILD_NODE_ID 5
 
 #if defined(DEBUG)
 unsigned long UPDATE_INTERVAL = 20000;  // Sleep time between reads (in milliseconds)
@@ -23,13 +26,19 @@ unsigned long UPDATE_INTERVAL = 1200000;  // Sleep time between reads (in millis
 
 #define BUTTON_PIN 4
 #define LED_PIN 9
+#define PH_INPUT_PIN A0
+#define MOIST_INPUT_PIN A1
+
 
 #define MIN_VOLTAGE 2400 // mV
 
 unsigned long updateTime = 0;
 
 MyMessage msgTemp(TEMP_CHILD_NODE_ID, V_TEMP);
-MyMessage msgHum(HUM_CHILD_NODE_ID, V_HUM);
+MyMessage msgPh(PH_CHILD_NODE_ID, S_WATER_QUALITY);
+MyMessage msgMoist(MOIST_CHILD_NODE_ID, S_MOISTURE);
+MyMessage msgLight(LIGHT_CHILD_NODE_ID, S_LIGHT_LEVEL);
+MyMessage msgUV(UV_CHILD_NODE_ID, S_UV);
 
 int oldBatteryPcnt = 0;
 
@@ -39,7 +48,11 @@ void presentation()
   sendSketchInfo("Garden Sensor", "1.0");
 
   // Register all sensors to gateway (they will be created as child devices)
-  present(TEMP_CHILD_NODE_ID, S_TEMP);  
+  present(TEMP_CHILD_NODE_ID,   S_TEMP);  
+  present(PH_CHILD_NODE_ID,     V_PH);
+  present(MOIST_CHILD_NODE_ID,  V_LEVEL);
+  present(LIGHT_CHILD_NODE_ID,  V_LEVEL);
+  present(UV_CHILD_NODE_ID,     V_UV);
 }
 
 long readVcc() {
@@ -78,8 +91,17 @@ void loop() {
 #ifdef DEBUG
     Serial.print("Voltage: "); Serial.println(volt);
 #endif 
-    // embedded temperature sensor (connected to A2)
-//    float t = (((float)analogRead(A2) * MySensors[2].Value / 1024.0) - 0.5)/0.01;
+    // internal temperature sensor (connected to A2)
+    //float t = (((float)analogRead(A2) * MySensors[2].Value / 1024.0) - 0.5)/0.01;
+    
+    { // Read PH
+      float ph = 8 - ((float)analogRead(PH_INPUT_PIN) / 1024.0) *  4.5;
+      send(msgPh.set(ph, 2));
+    }
+    { // Read moist
+      float m = (float)analogRead(MOIST_INPUT_PIN) / 102.4;
+      send(msgMoist.set((int)m));
+    }
   
     int batteryPcnt = map(volt, 0, 3000, 0, 100);
     if(batteryPcnt > 100) batteryPcnt = 100;
