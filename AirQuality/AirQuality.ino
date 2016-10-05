@@ -125,11 +125,7 @@ void loop(){
   Serial.print(co2ppm);
   Serial.println("ppm");
 #endif
-  if ((co2ppm != lastAIQ)&&(abs(co2ppm-lastAIQ)>=10)) {
-      send(msgPPM.set((long)ceil(co2ppm)));
-      lastAIQ = ceil(co2ppm);
-  }
-  
+  send(msgPPM.set((long)ceil(co2ppm)));  
   
   sleep(SLEEP_TIME);
 }
