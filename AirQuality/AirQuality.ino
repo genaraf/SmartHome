@@ -15,6 +15,9 @@ AM2320 th;
 #define SHARP_MEASURE_PIN A0
 #define SHARP_LED_POWER_PIN 4
 #define CO2_SENSOR_PWM_PIN 5
+// version 2
+#define TOUCH_IN_PIN 2
+#define BUZZER_OUT_PIN 6
  
 int samplingTime = 280;
 int deltaTime = 40;
@@ -55,6 +58,9 @@ void presentation() {
 void setup(){
   pinMode(SHARP_LED_POWER_PIN,OUTPUT);
   pinMode(CO2_SENSOR_PWM_PIN, INPUT);
+  // version 2
+  pinMode(TOUCH_IN_PIN, INPUT);
+  pinMode(BUZZER_OUT_PIN,OUTPUT);
   Wire.begin();
 }
  
